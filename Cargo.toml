@@ -1,0 +1,16 @@
+[package]
+name = "smf-cmd"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+chrono = "0.4.31"
+clap = "4.4.6"
+colored = "2.0.4"
+libcontract = "0.1.0"
+regex = "1.9.6"
+smf = "0.2.1"
+strip-ansi-escapes = "0.2.0"
