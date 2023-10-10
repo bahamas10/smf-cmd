@@ -30,7 +30,7 @@ impl ColorAwareString {
 
         let mut i = self.raw_len();
         while i < len {
-            out_string.push_str(" ");
+            out_string.push(' ');
             i += 1;
         }
 
@@ -43,7 +43,7 @@ impl ColorAwareString {
 
         let mut i = self.raw_len();
         while i < len {
-            pad.push_str(" ");
+            pad.push(' ');
             i += 1;
         }
 

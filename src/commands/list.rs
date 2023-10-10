@@ -1,6 +1,6 @@
 use anyhow::{ensure, Context, Result};
-use colored::*;
 use chrono::Utc;
+use colored::*;
 use libcontract::status::{ContractStatus, Detail};
 use regex::Regex;
 use smf::{Query, SmfState};
@@ -58,10 +58,11 @@ pub fn run(all: bool) -> Result<()> {
             let s = util::relative_duration(&dur);
 
             match dur.as_secs() {
-                n if n < 1 * 60 => s.to_string().red(),
+                n if n < 60 => s.to_string().red(),
                 n if n < 24 * 60 * 60 => s.to_string().yellow(),
                 _ => s.to_string().black().bold(),
-            }.to_string()
+            }
+            .to_string()
         };
 
         println!("{}", format_output_line(&[state, fmri, ctid, pids, time]));
@@ -162,9 +163,9 @@ fn format_output_line<T: AsRef<str>>(cols: &[T]) -> String {
     for (text, max, _suffix) in data {
         let cas = ColorAwareString::with_string(text.into());
 
-        line.push_str(" ");
-        let foo = cas.pad_end(max);
-        line.push_str(&foo);
+        line.push(' ');
+        let padded = cas.pad_end(max);
+        line.push_str(&padded);
     }
 
     line
