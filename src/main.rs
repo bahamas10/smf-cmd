@@ -18,8 +18,8 @@ fn main() -> Result<()> {
     let args = arguments::parse();
 
     match args.command {
-        SubCommands::List { all } => commands::list::run(all),
-        SubCommands::Log { .. } => commands::log::run(),
+        SubCommands::List(cmd) => commands::list::run(cmd),
+        SubCommands::Log(cmd) => commands::log::run(cmd),
         SubCommands::Enable { .. } => commands::enable::run(),
         SubCommands::Disable { .. } => commands::disable::run(),
     }

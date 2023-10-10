@@ -13,25 +13,46 @@ pub struct Args {
 #[derive(Debug, Subcommand)]
 pub enum SubCommands {
     /// List services
-    List {
-        /// Show all services (including disabled)
-        #[clap(short, long)]
-        all: bool,
-    },
+    List(SubCommandList),
 
     /// Tail service logs
     #[clap(alias = "logs")]
-    Log {
-        /// Follow the log file
-        #[clap(short, long)]
-        follow: bool,
-    },
+    Log(SubCommandLog),
 
     /// Enable service(s).
     Enable { services: Vec<String> },
 
     /// Disable service(s).
     Disable { services: Vec<String> },
+}
+
+#[derive(Debug, Parser)]
+pub struct SubCommandList {
+    /// Show all services (including disabled)
+    #[clap(short, long)]
+    pub all: bool,
+
+    /// Show only services with a contract
+    #[clap(short, long)]
+    pub contract: bool,
+
+    /// String to filter services on
+    pub filter: Option<String>,
+}
+
+#[derive(Debug, Parser)]
+pub struct SubCommandLog {
+    /// Follow the log file (passes `-F` to `tail`)
+    #[clap(short, long)]
+    pub follow: bool,
+
+    /// Number of lines to view (passes `-n` to `tail`)
+    #[clap(short, long)]
+    pub number: Option<u32>,
+
+    /// Services to process
+    #[clap(required = true)]
+    pub services: Vec<String>,
 }
 
 pub fn parse() -> Args {

@@ -9,7 +9,9 @@ use crate::util;
 use util::color_aware_string::ColorAwareString;
 use util::smf::parse_smf_date;
 
-pub fn run(all: bool) -> Result<()> {
+use crate::arguments::SubCommandList;
+
+pub fn run(cmd: SubCommandList) -> Result<()> {
     let q = Query::new();
     let mut svcs: Vec<_> = q.get_status_all().unwrap().collect();
 
@@ -35,19 +37,20 @@ pub fn run(all: bool) -> Result<()> {
             continue;
         }
 
-        if !all && svc.state == SmfState::Disabled {
+        if !cmd.all && svc.state == SmfState::Disabled {
             continue;
         }
 
-        /*
-        if let Some(f) = filter {
+        if cmd.contract && svc.contract_id.is_none() {
+            continue;
+        }
+
+        if let Some(ref f) = cmd.filter {
             if !svc.fmri.contains(f) {
                 continue;
             }
         }
-        */
 
-        //println!("{} {:?}", svc.fmri, svc.description);
         let state = stylize_smf_state(&svc.state);
         let fmri = stylize_fmri(&svc.fmri)?;
         let ctid = stylize_contract_id(&svc.contract_id);
@@ -137,7 +140,7 @@ fn stylize_fmri(fmri: &str) -> Result<String> {
         caps[1].cyan(),
         ":/".black().bold(),
         caps[2].black().bold(),
-        ":".black().bold(),
+        "/".black().bold(),
         caps[3].green(),
     );
 
