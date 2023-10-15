@@ -161,7 +161,7 @@ mod tests {
             .and_hms_opt(0, 0, 0)
             .unwrap();
 
-        let invalid = ["foo", "00:11:97", "Aug_58"];
+        let invalid = ["-", "", " ", "foo", "00:11:97", "Aug_58"];
 
         for s in invalid {
             let err = parse_smf_date(&now, s).unwrap_err();

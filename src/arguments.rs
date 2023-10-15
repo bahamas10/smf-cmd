@@ -2,6 +2,7 @@
 
 use clap::{Parser, Subcommand};
 
+/// `smf ...`
 #[derive(Debug, Parser)]
 #[clap(author, version, about, verbatim_doc_comment, long_about = None)]
 pub struct Args {
@@ -19,6 +20,9 @@ pub enum SubCommands {
     #[clap(alias = "logs")]
     Log(SubCommandLog),
 
+    /// Get service status
+    Status(SubCommandStatus),
+
     /// Enable service(s).
     Enable { services: Vec<String> },
 
@@ -26,6 +30,7 @@ pub enum SubCommands {
     Disable { services: Vec<String> },
 }
 
+/// `smf list ...`
 #[derive(Debug, Parser)]
 pub struct SubCommandList {
     /// Show all services (including disabled)
@@ -36,10 +41,23 @@ pub struct SubCommandList {
     #[clap(short, long)]
     pub contract: bool,
 
+    /// Show `ptree` output for services with a contract
+    #[clap(short, long)]
+    pub tree: bool,
+
     /// String to filter services on
     pub filter: Option<String>,
 }
 
+/// `smf status ...`
+#[derive(Debug, Parser)]
+pub struct SubCommandStatus {
+    /// Services to process
+    #[clap(required = true)]
+    pub services: Vec<String>,
+}
+
+/// `smf log ...`
 #[derive(Debug, Parser)]
 pub struct SubCommandLog {
     /// Follow the log file (passes `-F` to `tail`)

@@ -1,4 +1,6 @@
-use anyhow::{ensure, Context, Result};
+use std::process::Command;
+
+use anyhow::{bail, ensure, Context, Result};
 use chrono::Utc;
 use colored::*;
 use libcontract::status::{ContractStatus, Detail};
@@ -69,6 +71,11 @@ pub fn run(cmd: SubCommandList) -> Result<()> {
         };
 
         println!("{}", format_output_line(&[state, fmri, ctid, pids, time]));
+
+        if cmd.tree && svc.contract_id.is_some() {
+            let ptree = get_ptree_for_fmri(&svc.fmri)?;
+            println!("\n{}\n", ptree.bold().black());
+        }
     }
 
     println!();
@@ -172,4 +179,19 @@ fn format_output_line<T: AsRef<str>>(cols: &[T]) -> String {
     }
 
     line
+}
+
+fn get_ptree_for_fmri(fmri: &str) -> Result<String> {
+    let output = Command::new("ptree")
+        .args(["-gs", fmri])
+        .output()
+        .with_context(|| format!("failed to get ptree for fmri: {}", fmri))?;
+
+    if !output.status.success() {
+        bail!("failed to run ptree for fmri {}: {:#?}", fmri, output.status);
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+    Ok(stdout)
 }

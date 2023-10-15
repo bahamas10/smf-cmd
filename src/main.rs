@@ -20,6 +20,7 @@ fn main() -> Result<()> {
     match args.command {
         SubCommands::List(cmd) => commands::list::run(cmd),
         SubCommands::Log(cmd) => commands::log::run(cmd),
+        SubCommands::Status(cmd) => commands::status::run(cmd),
         SubCommands::Enable { .. } => commands::enable::run(),
         SubCommands::Disable { .. } => commands::disable::run(),
     }
