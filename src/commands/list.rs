@@ -8,7 +8,10 @@ use smf::{Query, SmfState};
 
 use crate::util;
 use util::color_aware_string::ColorAwareString;
-use util::smf::{get_ptree_for_fmri, parse_smf_date, stylize_fmri, stylize_smf_state};
+use util::smf::{
+    get_ptree_for_fmri, stylize_smf_date, stylize_smf_fmri,
+    stylize_smf_state_small,
+};
 
 use crate::arguments::SubCommandList;
 
@@ -52,22 +55,11 @@ pub fn run(cmd: SubCommandList) -> Result<()> {
             }
         }
 
-        let state = stylize_smf_state(&svc.state);
-        let fmri = stylize_fmri(&svc.fmri)?;
+        let state = stylize_smf_state_small(&svc.state);
+        let fmri = stylize_smf_fmri(&svc.fmri)?;
         let ctid = stylize_contract_id(&svc.contract_id);
         let pids = stylize_pids(&svc.contract_id);
-        let time = {
-            let then = parse_smf_date(&now, &svc.service_time)?;
-            let dur = (now - then).to_std()?;
-            let s = util::relative_duration(&dur);
-
-            match dur.as_secs() {
-                n if n < 60 => s.to_string().red(),
-                n if n < 24 * 60 * 60 => s.to_string().yellow(),
-                _ => s.to_string().black().bold(),
-            }
-            .to_string()
-        };
+        let time = stylize_smf_date(&now, &svc.service_time)?;
 
         println!("{}", format_output_line(&[state, fmri, ctid, pids, time]));
 

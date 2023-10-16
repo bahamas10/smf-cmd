@@ -22,7 +22,7 @@ pub fn get_ptree_for_fmri(fmri: &str) -> Result<String> {
 }
 
 /// Get a suitable char for the state (as a `String`).
-pub fn stylize_smf_state(state: &SmfState) -> String {
+pub fn stylize_smf_state_small(state: &SmfState) -> String {
     let s = match state {
         SmfState::Online => "✔".green(),
         SmfState::Disabled => "✖".black().bold(),
@@ -36,6 +36,35 @@ pub fn stylize_smf_state(state: &SmfState) -> String {
     s.to_string()
 }
 
+pub fn stylize_smf_state_full(state: &SmfState) -> String {
+    let s = match state {
+        SmfState::Online => "online".green(),
+        SmfState::Disabled => "disabled".black().bold(),
+        SmfState::Degraded => "degraded".red(),
+        SmfState::Maintenance => "maintenance".red().bold(),
+        SmfState::Offline => "offline".yellow(),
+        SmfState::Legacy => "legacy".green(),
+        SmfState::Uninitialized => "uninitialized".yellow(),
+    };
+
+    s.to_string()
+}
+
+pub fn stylize_smf_date(now: &NaiveDateTime, date: &str) -> Result<String> {
+    let then = parse_smf_date(now, date)?;
+    let dur = (*now - then).to_std()?;
+    let s = super::relative_duration(&dur);
+
+    let s = match dur.as_secs() {
+        n if n < 60 => s.to_string().red(),
+        n if n < 24 * 60 * 60 => s.to_string().yellow(),
+        _ => s.to_string().black().bold(),
+    }
+    .to_string();
+
+    Ok(s)
+}
+
 /**
  * Style an FMRI
  *
@@ -47,7 +76,7 @@ pub fn stylize_smf_state(state: &SmfState) -> String {
  *
  * svc:/milestone/single-user:default
  */
-pub fn stylize_fmri(fmri: &str) -> Result<String> {
+pub fn stylize_smf_fmri(fmri: &str) -> Result<String> {
     let fmri_re = Regex::new(r"^([a-z]+):/(.*)/(.*):(.*)$").unwrap();
 
     let caps = fmri_re
@@ -72,7 +101,6 @@ pub fn stylize_fmri(fmri: &str) -> Result<String> {
 
     Ok(out)
 }
-
 
 /**
  * Parse a date as seen by `svcs`.
