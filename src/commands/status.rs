@@ -55,22 +55,19 @@ pub fn run(cmd: SubCommandStatus) -> Result<()> {
                 ctid.to_string().magenta()
             );
 
-            match ContractStatus::new(ctid, Detail::All) {
-                Ok(status) => {
-                    let members = status.get_members().unwrap_or_default();
-                    if !members.is_empty() {
-                        let pids: Vec<_> = members
-                            .iter()
-                            .map(|x| x.to_string().cyan().to_string())
-                            .collect();
-                        println!(
-                            "{}: {}",
-                            "        pids".bold(),
-                            pids.join(", ")
-                        );
-                    }
+            if let Ok(status) = ContractStatus::new(ctid, Detail::All) {
+                let members = status.get_members().unwrap_or_default();
+                if !members.is_empty() {
+                    let pids: Vec<_> = members
+                        .iter()
+                        .map(|x| x.to_string().cyan().to_string())
+                        .collect();
+                    println!(
+                        "{}: {}",
+                        "        pids".bold(),
+                        pids.join(", ")
+                    );
                 }
-                Err(_) => (),
             };
         }
 
