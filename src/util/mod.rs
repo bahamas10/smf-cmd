@@ -1,3 +1,5 @@
+//! Various util functions
+
 use std::time::Duration;
 
 pub mod color_aware_string;

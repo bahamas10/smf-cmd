@@ -1,15 +1,14 @@
-use std::process::Command;
+//! `smf list ...`
 
-use anyhow::{bail, ensure, Context, Result};
+use anyhow::Result;
 use chrono::Utc;
 use colored::*;
 use libcontract::status::{ContractStatus, Detail};
-use regex::Regex;
 use smf::{Query, SmfState};
 
 use crate::util;
 use util::color_aware_string::ColorAwareString;
-use util::smf::parse_smf_date;
+use util::smf::{get_ptree_for_fmri, parse_smf_date, stylize_fmri, stylize_smf_state};
 
 use crate::arguments::SubCommandList;
 
@@ -83,21 +82,6 @@ pub fn run(cmd: SubCommandList) -> Result<()> {
     Ok(())
 }
 
-/// Get a suitable char for the state (as a `String`).
-fn stylize_smf_state(state: &SmfState) -> String {
-    let s = match state {
-        SmfState::Online => "✔".green(),
-        SmfState::Disabled => "✖".black().bold(),
-        SmfState::Degraded => "✖".red(),
-        SmfState::Maintenance => "*".red().bold(),
-        SmfState::Offline => "*".yellow(),
-        SmfState::Legacy => "L".green(),
-        SmfState::Uninitialized => "?".yellow(),
-    };
-
-    s.to_string()
-}
-
 fn stylize_contract_id(ctid: &Option<usize>) -> String {
     match ctid {
         Some(ctid) => ctid.to_string().magenta(),
@@ -122,43 +106,6 @@ fn stylize_pids(ctid: &Option<usize>) -> String {
     .to_string()
 }
 
-/**
- * Style an FMRI
- *
- * Expects a string that looks like:
- *
- * <type>:/<name>:<instance>
- *
- * For example:
- *
- * svc:/milestone/single-user:default
- */
-fn stylize_fmri(fmri: &str) -> Result<String> {
-    let fmri_re = Regex::new(r"^([a-z]+):/(.*)/(.*):(.*)$").unwrap();
-
-    let caps = fmri_re
-        .captures(fmri)
-        .with_context(|| format!("cannot parse fmri: {}", fmri))?;
-
-    ensure!(caps.len() == 5, "invalid caps len");
-
-    let mut out = format!(
-        "{}{}{}{}{}",
-        caps[1].cyan(),
-        ":/".black().bold(),
-        caps[2].black().bold(),
-        "/".black().bold(),
-        caps[3].green(),
-    );
-
-    match &caps[4] {
-        "default" => (),
-        inst => out = format!("{}:{}", out, inst.magenta()),
-    };
-
-    Ok(out)
-}
-
 fn format_output_line<T: AsRef<str>>(cols: &[T]) -> String {
     let data = [
         (cols[0].as_ref(), 1, "..."),
@@ -179,19 +126,4 @@ fn format_output_line<T: AsRef<str>>(cols: &[T]) -> String {
     }
 
     line
-}
-
-fn get_ptree_for_fmri(fmri: &str) -> Result<String> {
-    let output = Command::new("ptree")
-        .args(["-gs", fmri])
-        .output()
-        .with_context(|| format!("failed to get ptree for fmri: {}", fmri))?;
-
-    if !output.status.success() {
-        bail!("failed to run ptree for fmri {}: {:#?}", fmri, output.status);
-    }
-
-    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-
-    Ok(stdout)
 }

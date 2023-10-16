@@ -1,5 +1,78 @@
-use anyhow::{ensure, Context, Result};
+use std::process::Command;
+
+use anyhow::{bail, ensure, Context, Result};
 use chrono::{Datelike, Days, Months, NaiveDate, NaiveDateTime};
+use colored::*;
+use regex::Regex;
+use smf::SmfState;
+
+pub fn get_ptree_for_fmri(fmri: &str) -> Result<String> {
+    let output = Command::new("ptree")
+        .args(["-gs", fmri])
+        .output()
+        .with_context(|| format!("failed to get ptree for fmri: {}", fmri))?;
+
+    if !output.status.success() {
+        bail!("failed to run ptree for fmri {}: {:#?}", fmri, output.status);
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+    Ok(stdout)
+}
+
+/// Get a suitable char for the state (as a `String`).
+pub fn stylize_smf_state(state: &SmfState) -> String {
+    let s = match state {
+        SmfState::Online => "✔".green(),
+        SmfState::Disabled => "✖".black().bold(),
+        SmfState::Degraded => "✖".red(),
+        SmfState::Maintenance => "*".red().bold(),
+        SmfState::Offline => "*".yellow(),
+        SmfState::Legacy => "L".green(),
+        SmfState::Uninitialized => "?".yellow(),
+    };
+
+    s.to_string()
+}
+
+/**
+ * Style an FMRI
+ *
+ * Expects a string that looks like:
+ *
+ * <type>:/<name>:<instance>
+ *
+ * For example:
+ *
+ * svc:/milestone/single-user:default
+ */
+pub fn stylize_fmri(fmri: &str) -> Result<String> {
+    let fmri_re = Regex::new(r"^([a-z]+):/(.*)/(.*):(.*)$").unwrap();
+
+    let caps = fmri_re
+        .captures(fmri)
+        .with_context(|| format!("cannot parse fmri: {}", fmri))?;
+
+    ensure!(caps.len() == 5, "invalid caps len");
+
+    let mut out = format!(
+        "{}{}{}{}{}",
+        caps[1].cyan(),
+        ":/".black().bold(),
+        caps[2].black().bold(),
+        "/".black().bold(),
+        caps[3].green(),
+    );
+
+    match &caps[4] {
+        "default" => (),
+        inst => out = format!("{}:{}", out, inst.magenta()),
+    };
+
+    Ok(out)
+}
+
 
 /**
  * Parse a date as seen by `svcs`.

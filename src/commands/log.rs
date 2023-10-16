@@ -1,3 +1,5 @@
+//! `smf log ...`
+
 use anyhow::{Context, Result};
 use colored::*;
 use exec::Command;
