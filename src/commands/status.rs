@@ -1,6 +1,6 @@
 //! `smf status ...`
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use chrono::Utc;
 use colored::*;
 use libcontract::status::{ContractStatus, Detail};
@@ -22,15 +22,30 @@ use crate::arguments::SubCommandStatus;
 pub fn run(cmd: SubCommandStatus) -> Result<()> {
     let select = QuerySelection::ByPattern(&cmd.services);
     let q = Query::new();
-    let svcs = q.get_status(select)?;
+    let svcs = q
+        .get_status(select)
+        .with_context(|| format!("failed to get_status: {:?}", cmd.services))?;
 
     let now = Utc::now().naive_utc();
 
     for svc in svcs {
         let cur_svc = &[&svc.fmri];
-        let dependencies: Vec<_> = q.get_dependencies_of(cur_svc)?.collect();
-        let dependents: Vec<_> = q.get_dependents_of(cur_svc)?.collect();
-        let log_files: Vec<_> = q.get_log_files(cur_svc)?.collect();
+        let dependencies: Vec<_> = q
+            .get_dependencies_of(cur_svc)
+            .with_context(|| {
+                format!("failed to get_dependencies_of: {}", &svc.fmri)
+            })?
+            .collect();
+        let dependents: Vec<_> = q
+            .get_dependents_of(cur_svc)
+            .with_context(|| {
+                format!("failed to get_dependents_of: {}", &svc.fmri)
+            })?
+            .collect();
+        let log_files: Vec<_> = q
+            .get_log_files(cur_svc)
+            .with_context(|| format!("failed to get_log_files: {}", &svc.fmri))?
+            .collect();
 
         let fmri = stylize_smf_fmri(&svc.fmri)?;
         let state_full = stylize_smf_state_full(&svc.state);
@@ -62,11 +77,7 @@ pub fn run(cmd: SubCommandStatus) -> Result<()> {
                         .iter()
                         .map(|x| x.to_string().cyan().to_string())
                         .collect();
-                    println!(
-                        "{}: {}",
-                        "        pids".bold(),
-                        pids.join(", ")
-                    );
+                    println!("{}: {}", "        pids".bold(), pids.join(", "));
                 }
             };
         }
