@@ -52,7 +52,7 @@ pub struct SubCommandList {
         value_delimiter = ',',
         default_value = "fmri"
     )]
-    pub sort: Option<Vec<ListSortItems>>,
+    pub sort: Vec<ListSortItems>,
 
     /// String to filter services on
     pub filter: Option<String>,

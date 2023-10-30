@@ -24,22 +24,18 @@ pub fn run(cmd: SubCommandList) -> Result<()> {
     let now = Utc::now().naive_utc();
 
     // sort services by fields given
-    if let Some(sorts) = cmd.sort {
-        for sort in sorts {
-            match sort {
-                ListSortItems::Fmri => {
-                    svcs.sort_by_key(|svc| svc.fmri.to_string())
-                }
-                ListSortItems::State => {
-                    svcs.sort_by_key(|svc| svc.state.to_string())
-                }
-                ListSortItems::Contract => {
-                    svcs.sort_by_key(|svc| svc.contract_id.unwrap_or_default())
-                }
-                ListSortItems::Time => svcs.sort_by_key(|svc| {
-                    parse_smf_date(&now, &svc.service_time).unwrap()
-                }),
+    for sort in cmd.sort {
+        match sort {
+            ListSortItems::Fmri => svcs.sort_by_key(|svc| svc.fmri.to_string()),
+            ListSortItems::State => {
+                svcs.sort_by_key(|svc| svc.state.to_string())
             }
+            ListSortItems::Contract => {
+                svcs.sort_by_key(|svc| svc.contract_id.unwrap_or_default())
+            }
+            ListSortItems::Time => svcs.sort_by_key(|svc| {
+                parse_smf_date(&now, &svc.service_time).unwrap()
+            }),
         }
     }
 
