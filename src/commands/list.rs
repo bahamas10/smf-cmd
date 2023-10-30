@@ -1,6 +1,6 @@
 //! `smf list ...`
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use chrono::Utc;
 use colored::*;
 use libcontract::status::{ContractStatus, Detail};
@@ -9,19 +9,39 @@ use smf::{Query, SmfState};
 use crate::util;
 use util::color_aware_string::ColorAwareString;
 use util::smf::{
-    get_ptree_for_fmri, stylize_smf_date, stylize_smf_fmri,
+    get_ptree_for_fmri, parse_smf_date, stylize_smf_date, stylize_smf_fmri,
     stylize_smf_state_small,
 };
 
-use crate::arguments::SubCommandList;
+use crate::arguments::{ListSortItems, SubCommandList};
 
 pub fn run(cmd: SubCommandList) -> Result<()> {
+    // list all services
     let q = Query::new();
-    let mut svcs: Vec<_> = q.get_status_all().unwrap().collect();
-
-    svcs.sort_by_key(|svc| svc.fmri.to_string());
+    let mut svcs: Vec<_> =
+        q.get_status_all().context("failed to list services")?.collect();
 
     let now = Utc::now().naive_utc();
+
+    // sort services by fields given
+    if let Some(sorts) = cmd.sort {
+        for sort in sorts {
+            match sort {
+                ListSortItems::Fmri => {
+                    svcs.sort_by_key(|svc| svc.fmri.to_string())
+                }
+                ListSortItems::State => {
+                    svcs.sort_by_key(|svc| svc.state.to_string())
+                }
+                ListSortItems::Contract => {
+                    svcs.sort_by_key(|svc| svc.contract_id.unwrap_or_default())
+                }
+                ListSortItems::Time => svcs.sort_by_key(|svc| {
+                    parse_smf_date(&now, &svc.service_time).unwrap()
+                }),
+            }
+        }
+    }
 
     println!();
     println!(

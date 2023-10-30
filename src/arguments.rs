@@ -1,6 +1,6 @@
 //! Argument parsing logic (via `clap`) for smf.
 
-use clap::{Parser, Subcommand};
+use clap::{ArgEnum, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about, verbatim_doc_comment, long_about = None)]
@@ -44,6 +44,16 @@ pub struct SubCommandList {
     #[clap(short, long)]
     pub tree: bool,
 
+    /// Sort output based on the given fields
+    #[clap(
+        short,
+        long,
+        value_enum,
+        value_delimiter = ',',
+        default_value = "fmri"
+    )]
+    pub sort: Option<Vec<ListSortItems>>,
+
     /// String to filter services on
     pub filter: Option<String>,
 }
@@ -70,6 +80,15 @@ pub struct SubCommandLog {
     /// Services to process
     #[clap(required = true)]
     pub services: Vec<String>,
+}
+
+#[derive(Debug, Clone, ArgEnum)]
+#[clap(rename_all = "lowercase")]
+pub enum ListSortItems {
+    Fmri,
+    State,
+    Time,
+    Contract,
 }
 
 pub fn parse() -> Args {
