@@ -2,6 +2,7 @@
 name = "smf-cmd"
 version = "0.1.0"
 edition = "2021"
+description = "Wrapper command for SMF on illumos based operating systems"
 
 [[bin]]
 name = "smf"
@@ -15,5 +16,6 @@ colored = "2.0.4"
 exec = "0.3.1"
 libcontract = "0.1.0"
 regex = "1.9.6"
-smf = "0.2.1"
 strip-ansi-escapes = "0.2.0"
+
+smf = { "git" = "https://github.com/oxidecomputer/smf.git", "hash" = "c52633e53fe3d6d20d149131ecf5d946e51b4847"  }

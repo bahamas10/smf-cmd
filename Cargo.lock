@@ -554,9 +554,8 @@ checksum = "a7cee0529a6d40f580e7a5e6c495c8fbfe21b7b52795ed4bb5e62cdf92bc6380"
 
 [[package]]
 name = "smf"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f19d427ae89311c2770c49fdcfa14627577c499311fe8f4cc8fcfde2dd3c4e2e"
+version = "0.2.3"
+source = "git+https://github.com/oxidecomputer/smf.git#c52633e53fe3d6d20d149131ecf5d946e51b4847"
 dependencies = [
  "thiserror",
 ]

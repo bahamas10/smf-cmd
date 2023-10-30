@@ -1,6 +1,6 @@
 //! `smf log ...`
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use colored::*;
 use exec::Command;
 use smf::Query;
@@ -19,6 +19,10 @@ pub fn run(cmd: SubCommandLog) -> Result<()> {
         })?
         .map(|p| p.into_os_string().into_string().unwrap())
         .collect();
+
+    if log_files.is_empty() {
+        bail!("no log files found for: {:?}", cmd.services);
+    }
 
     // construct arguments for `tail`
     let mut args: Vec<String> = vec!["tail".into()];

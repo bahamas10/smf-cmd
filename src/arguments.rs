@@ -2,7 +2,6 @@
 
 use clap::{Parser, Subcommand};
 
-/// `smf ...`
 #[derive(Debug, Parser)]
 #[clap(author, version, about, verbatim_doc_comment, long_about = None)]
 pub struct Args {
