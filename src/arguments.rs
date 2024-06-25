@@ -61,6 +61,10 @@ pub struct SubCommandList {
 /// `smf status ...`
 #[derive(Debug, Parser)]
 pub struct SubCommandStatus {
+    /// Show more information about the service
+    #[clap(short = 'l', long = "long")]
+    pub long: bool,
+
     /// Services to process
     #[clap(required = true)]
     pub services: Vec<String>,

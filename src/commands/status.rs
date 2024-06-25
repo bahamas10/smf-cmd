@@ -87,10 +87,12 @@ pub fn run(cmd: SubCommandStatus) -> Result<()> {
             "dependencies".bold(),
             dependencies.len().to_string().magenta()
         );
-        for dep in dependencies {
-            let dep_fmri = stylize_smf_fmri(&dep.fmri)?;
-            let dep_state_small = stylize_smf_state_small(&dep.state);
-            println!("              {} {}", dep_state_small, dep_fmri);
+        if cmd.long {
+            for dep in dependencies {
+                let dep_fmri = stylize_smf_fmri(&dep.fmri)?;
+                let dep_state_small = stylize_smf_state_small(&dep.state);
+                println!("              {} {}", dep_state_small, dep_fmri);
+            }
         }
 
         println!(
@@ -98,10 +100,12 @@ pub fn run(cmd: SubCommandStatus) -> Result<()> {
             "  dependents".bold(),
             dependents.len().to_string().magenta()
         );
-        for dep in dependents {
-            let dep_fmri = stylize_smf_fmri(&dep.fmri)?;
-            let dep_state_small = stylize_smf_state_small(&dep.state);
-            println!("              {} {}", dep_state_small, dep_fmri);
+        if cmd.long {
+            for dep in dependents {
+                let dep_fmri = stylize_smf_fmri(&dep.fmri)?;
+                let dep_state_small = stylize_smf_state_small(&dep.state);
+                println!("              {} {}", dep_state_small, dep_fmri);
+            }
         }
 
         println!(
@@ -109,9 +113,11 @@ pub fn run(cmd: SubCommandStatus) -> Result<()> {
             "   log files".bold(),
             log_files.len().to_string().magenta()
         );
-        for log_file in log_files {
-            let name = log_file.into_os_string().into_string().unwrap();
-            println!("              - {}", name.cyan());
+        if cmd.long {
+            for log_file in log_files {
+                let name = log_file.into_os_string().into_string().unwrap();
+                println!("              - {}", name.cyan());
+            }
         }
 
         println!();
