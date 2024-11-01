@@ -50,7 +50,7 @@ pub struct SubCommandList {
         long,
         value_enum,
         value_delimiter = ',',
-        default_value = "fmri"
+        default_value = "time,fmri"
     )]
     pub sort: Vec<ListSortItems>,
 
@@ -61,6 +61,10 @@ pub struct SubCommandList {
 /// `smf status ...`
 #[derive(Debug, Parser)]
 pub struct SubCommandStatus {
+    /// Show more output (include multiline values)
+    #[clap(short, long)]
+    pub long: bool,
+
     /// Services to process
     #[clap(required = true)]
     pub services: Vec<String>,
